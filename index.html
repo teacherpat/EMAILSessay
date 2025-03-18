@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quiz & Video Integration with Vocabulary Review</title>
+  <!-- Import Comfortaa font -->
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa&display=swap" rel="stylesheet">
+  <style>
+    /* Global Styles */
+    body {
+      font-family: 'Comfortaa', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+      color: #0047ab;
+    }
+    /* Header with Back Button and Blurred Background Effect */
+    .header {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 120px;
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .back-button {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      color: #0047ab;
+      text-decoration: none;
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .header h1 {
+      font-size: 48px;
+      color: #0047ab;
+      margin: 0;
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    /* Main Container */
+    .page-content {
+      padding: 20px;
+    }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    /* Softened corners for major elements */
+    .quiz-container,
+    .video-notes-container,
+    .vocab-container,
+    .video-container,
+    .notes {
+      border-radius: 8px;
+    }
+    .quiz-container {
+      flex: 2;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 10px;
+      min-height: 80vh;
+    }
+    .video-notes-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      min-height: 80vh;
+    }
+    .video-container {
+      position: relative;
+      width: 100%;
+      padding-bottom: 56.25%; /* 16:9 aspect ratio */
+      background-color: #000;
+      overflow: hidden;
+    }
+    .video-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .notes {
+      width: 100%;
+      height: 200px;
+      padding: 10px;
+      font-size: 16px;
+      box-sizing: border-box;
+      resize: vertical;
+    }
+    .quiz-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    /* Vocabulary Spaced Repetition Styling */
+    .vocab-container {
+      margin: 40px auto 0;
+      max-width: 800px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    .vocab-header {
+      font-size: 14px;
+      text-align: left;
+      margin-bottom: 10px;
+    }
+    #vocabDisplay {
+      font-size: 32px;
+      text-align: center;
+      margin: 20px 0;
+    }
+    #vocabDefinition {
+      font-size: 18px;
+      text-align: center;
+      margin: 10px 0;
+      display: none;
+    }
+    .vocab-buttons {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .vocab-buttons button {
+      margin: 0 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #e0e0e0;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    #resetContainer {
+      text-align: center;
+      margin-top: 20px;
+      display: none;
+    }
+    #resetContainer button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #e0e0e0;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    /* EMAIL EDITING GAME STYLES */
+    .email-section {
+      background-color: #f9f9f9;
+      border: 1px solid #ccc;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    .email-section h2 {
+      font-size: 28px;
+      margin-top: 0;
+    }
+    .replacement-words {
+      font-size: 14px;
+      background-color: #e8f0fe;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .email-editable {
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 8px;
+      min-height: 200px;
+      margin-bottom: 10px;
+      overflow-wrap: break-word;
+    }
+    u {
+      text-decoration: underline;
+      color: #0055ff;
+    }
+    button.edit-btn {
+      background-color: #0047ab;
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button.edit-btn:hover {
+      background-color: #00357a;
+    }
+    .feedback {
+      background-color: #e8f0fe;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 10px;
+      font-size: 16px;
+      color: #00357a;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Section -->
+  <header class="header">
+    <a class="back-button" href="https://www.teacherpathiggins.com/lesson-topics">Back</a>
+    <h1>Emails</h1>
+  </header>
+
+  <div class="page-content">
+    <div class="container">
+      <!-- Quizrise Quiz Section -->
+      <div class="quiz-container">
+        <iframe src="https://app.quizrise.com/play/cm5ywjbz50001tagoas0ncne3" frameborder="0"></iframe>
+      </div>
+      <!-- Video and Notes Section -->
+      <div class="video-notes-container">
+        <div class="video-container">
+          <iframe src="https://www.youtube.com/embed/ZSi30z0_0po" allowfullscreen></iframe>
+        </div>
+        <textarea class="notes" placeholder="take notes while you watch the video"></textarea>
+      </div>
+    </div>
+
+    <!-- Vocabulary Spaced Repetition Section -->
+    <div class="vocab-container">
+      <div class="vocab-header">Vocabulary review</div>
+      <div id="vocabDisplay"></div>
+      <div id="vocabDefinition"></div>
+      <div class="vocab-buttons" id="initialButtons">
+        <button onclick="handleKnowIt()">I know it</button>
+        <button onclick="handleNotSure()">I'm not sure</button>
+      </div>
+      <div class="vocab-buttons" id="nextButton" style="display:none;">
+        <button onclick="handleNextWord()">Next Word</button>
+      </div>
+      <div id="resetContainer">
+        <button onclick="resetVocab()">Reset</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- EMAIL EDITING GAME: Professional Language in Emails -->
+  <div class="container" style="margin-top: 40px;">
+    <div class="email-section" id="section-edit">
+      <h2>Email Editing Game: Professional Language in Emails</h2>
+      <div class="replacement-words">
+        Replacement Words for Email 1: Dear | Hope to hear from you soon | I'm afraid I am unsatisfied with the product | Happy Friday! | Please advise on the next steps. | I'm very angry with
+      </div>
+      <div id="email-edit1" class="email-editable" contenteditable="true">
+<u>Hey!</u> Thomas, <br><br>
+Hope you are well.<br><br>
+I am writing to complain about the products that were delivered on 20/12/2020.<br>
+<u>The quality of the products was terrible!!</u><br>
+I expect to receive a full refund or a new delivery.<br>
+<u>What happens now?</u><br><br>
+Kind regards,<br>
+Joanna
+      </div>
+      
+      <div class="replacement-words">
+        Replacement Words for Email 2: Regards | Could you tell me when… | This is just a quick note | Thx | I need to know ASAP... | Sorry for the interruption
+      </div>
+      <div id="email-edit2" class="email-editable" contenteditable="true">
+Hi Michael,<br><br>
+<u>Here is an email for you</u> about the invoice. The finance department has asked me to email you regarding the status of the process.<br>
+<u>You need to tell me as soon as</u> the price is confirmed.<br>
+I’m looking forward to hearing from you.<br><br>
+<u>Bye,</u><br>
+Thomas.
+      </div>
+      
+      <div class="replacement-words">
+        Replacement Words for Email 3: Love | Would it be possible to… | I am writing to... | Thanks in advance | I need your help… | The subject of this email...
+      </div>
+      <div id="email-edit3" class="email-editable" contenteditable="true">
+Hello Richard,<br><br>
+Hope you had a great weekend.<br><br>
+<u>I want to change my order.</u><br>
+<u>You need to</u> increase the quantity from 100 units to 150 units, we will pay the difference.<br>
+Apologies for any inconvenience caused.<br><br>
+<u>Have a blessed day,</u><br>
+John.
+      </div>
+      
+      <button class="edit-btn" onclick="checkEditedEmails()">Submit Edited Emails</button>
+      
+      <div class="feedback" id="feedback-edit1"></div>
+      <div class="feedback" id="feedback-edit2"></div>
+      <div class="feedback" id="feedback-edit3"></div>
+    </div>
+  </div>
+  
+  <script>
+    // Vocabulary Spaced Repetition Code (unchanged)
+    const vocabWords = [
+      { word: "Salutation", definition: "The greeting at the beginning of an email or letter." },
+      { word: "Forward", definition: "The act of sending a received email on to another recipient." },
+      { word: "CC (Carbon Copy)", definition: "Including additional recipients in an email so they receive a copy." },
+      { word: "Attach", definition: "To include a document or file with an email." },
+      { word: "Thread", definition: "A series of connected email messages on a single topic." },
+      { word: "Spam", definition: "Unsolicited or irrelevant emails, often sent in bulk." },
+      { word: "Etiquette", definition: "The set of customary rules and polite behaviors expected in professional email communication." },
+      { word: "Template", definition: "A pre-designed format or draft for emails that may require customization." },
+      { word: "Tone", definition: "The overall attitude or character conveyed in the email’s language." },
+      { word: "Correspondence", definition: "The written exchange of messages, typically referring to formal business communication." }
+    ];
+    
+    let vocabQueue = [...vocabWords];
+    let currentVocab = null;
+    
+    function showNextVocab() {
+      document.getElementById("vocabDefinition").style.display = "none";
+      document.getElementById("initialButtons").style.display = "block";
+      document.getElementById("nextButton").style.display = "none";
+      document.getElementById("resetContainer").style.display = "none";
+      
+      if (vocabQueue.length === 0) {
+        document.getElementById("vocabDisplay").innerText = "Great job! You've reviewed all words.";
+        document.getElementById("initialButtons").style.display = "none";
+        document.getElementById("resetContainer").style.display = "block";
+        return;
+      }
+      currentVocab = vocabQueue[0];
+      document.getElementById("vocabDisplay").innerText = currentVocab.word;
+    }
+    
+    function handleKnowIt() {
+      vocabQueue.shift();
+      currentVocab = null;
+      showNextVocab();
+    }
+    
+    function handleNotSure() {
+      if (currentVocab) {
+        document.getElementById("vocabDefinition").innerText = currentVocab.definition;
+        document.getElementById("vocabDefinition").style.display = "block";
+        document.getElementById("initialButtons").style.display = "none";
+        document.getElementById("nextButton").style.display = "block";
+      }
+    }
+    
+    function handleNextWord() {
+      vocabQueue.shift();
+      vocabQueue.push(currentVocab);
+      currentVocab = null;
+      showNextVocab();
+    }
+    
+    function resetVocab() {
+      vocabQueue = [...vocabWords];
+      currentVocab = null;
+      showNextVocab();
+    }
+    
+    window.onload = function() {
+      showNextVocab();
+    }
+    
+    // Email Editing Game checking function
+    function checkEditedEmails() {
+      // Email 1 check
+      const text1 = document.getElementById("email-edit1").innerText.toLowerCase();
+      let fb1 = "";
+      if (!text1.includes("dear")) {
+        fb1 += "Email 1: Replace the greeting with 'Dear'.<br>";
+      }
+      if (!text1.includes("i'm afraid i am unsatisfied with the product")) {
+        fb1 += "Email 1: Replace the complaint phrase with 'I'm afraid I am unsatisfied with the product'.<br>";
+      }
+      if (!text1.includes("please advise on the next steps")) {
+        fb1 += "Email 1: Replace the inquiry with 'Please advise on the next steps.'<br>";
+      }
+      document.getElementById("feedback-edit1").innerHTML = fb1 || "Email 1: Great job!";
+      
+      // Email 2 check
+      const text2 = document.getElementById("email-edit2").innerText.toLowerCase();
+      let fb2 = "";
+      if (!text2.includes("this is just a quick note")) {
+        fb2 += "Email 2: Replace 'Here is an email for you' with 'This is just a quick note'.<br>";
+      }
+      if (!text2.includes("could you tell me when")) {
+        fb2 += "Email 2: Replace 'You need to tell me as soon as' with 'Could you tell me when…'.<br>";
+      }
+      if (!text2.includes("regards")) {
+        fb2 += "Email 2: Replace 'Bye,' with 'Regards,' in the sign-off.<br>";
+      }
+      document.getElementById("feedback-edit2").innerHTML = fb2 || "Email 2: Great job!";
+      
+      // Email 3 check
+      const text3 = document.getElementById("email-edit3").innerText.toLowerCase();
+      let fb3 = "";
+      if (!text3.includes("would it be possible to")) {
+        fb3 += "Email 3: Replace 'I want to change my order.' with a formal request like 'Would it be possible to change my order?'<br>";
+      }
+      if (text3.includes("you need to")) {
+        fb3 += "Email 3: Remove the directive 'You need to' for a more polite request.<br>";
+      }
+      if (!text3.includes("thanks in advance")) {
+        fb3 += "Email 3: Replace 'Have a blessed day,' with 'Thanks in advance,' in the closing.<br>";
+      }
+      document.getElementById("feedback-edit3").innerHTML = fb3 || "Email 3: Great job!";
+    }
+  </script>
+</body>
+</html>
